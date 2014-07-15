@@ -1,0 +1,448 @@
+/**
+ * LESS MIXINS V0.4.5
+ *
+ * 0.4.5
+ * Removed support for vendor prefixed border radius
+ * removed support for -moz box shadow
+ * removed support for -moz and -ms in gradients
+ * drop IE7 opacity support
+ * 
+ * 0.4.4
+ * Added .BoxSizing()
+ * 
+ * 0.4.3
+ * Added .ButtonHover()
+ * Added .ButtonOverlay()
+ * 
+ * 0.4.2
+ * Added .TransformStyle()
+ *
+ * 0.4.1
+ * Added .ContrastText()
+ * Added .ShadedTextBackground()
+ *
+ * 0.4
+ * Added .GradientAlt()
+ *
+ * 0.3.10
+ * Reintroduced ms opacity filters and removed moz and khtml prefixes
+ * Removed ms gradient filters - causing an unidentified bug on LRC buttons @todo: try and fix this
+ *
+ * 0.3.9
+ * Made .Gradient() a guarded mixin dependent on wheter the to and from values are percentages or not
+ *
+ * 0.3.8
+ * Fixed build error due to unquoted URLs for background images
+ * 0.37
+ * Added new .BoxShadow mixin for inset and outer shadows
+ *
+ * 0.36
+ * Added .TransDuration
+ * Added .UserSelect
+ * Added .Perspective
+ *
+ * Fixed escaped ms filters
+ */
+
+.BoxSizing(@method: border-box){
+    -moz-box-sizing    : @method;
+    -webkit-box-sizing : @method;
+    box-sizing         : @method;
+}
+.Background(@color, @alpha: 1){
+    background-color : @color; /* IE LT 9  http://css-tricks.com/rgba-browser-support/ */
+    background-color : hsla(hue(@color), saturation(@color), lightness(@color), @alpha);
+}
+/* for simpLESS compatibility */
+.FontColor(@color){
+	color: @light_txt;
+}
+
+.UserSelect(@selectable: none){
+	-webkit-user-select: none;  /* Chrome all / Safari all */
+	-moz-user-select   : none;     /* Firefox all */
+	-ms-user-select    : none;      /* IE 10+ */
+    user-select        : none;
+}
+
+// auto select an appropriate font color for chosen background color
+.ContrastBackground(@color, @image, @repeat, @horiz, @verti){
+	.FontColor(@color);
+	background: @color url('@image') @repeat @horiz @verti;
+}
+
+.ContrastBackground(@color, @image){
+	.FontColor(@color);
+	background: @color url('@image');
+}
+
+.ContrastBackground(@color){
+	.FontColor(@color);
+	background: @color;
+}
+
+.ContrastText (@color) when (lightness(@color) >= 70%) {
+	background-color : @color;
+	color            : #000;
+}
+.ContrastText (@color) when (lightness(@color) < 70%) {
+	background-color : @color;
+	color            : #fff;
+}
+
+.ShadedTextBackground(@text-color) when (lightness(@text-color) >= 30%){
+	background-color : hsl(hue(@text-color), saturation(@text-color), 90%);
+	//background-color : hsl(10, 10%, 90%);
+	color			 : @text-color;
+}
+.ShadedTextBackground(@text-color) when (lightness(@text-color) < 30%){
+	background-color : hsl(hue(@text-color), saturation(@text-color), 95%);
+	//
+	color			 : @text-color;
+}
+
+// .ContrastText(@color) when ( lightness(@color) <= 50% ) {
+// 	color : #000;
+// }
+
+// .ContrastText(@color) when ( lightness(@color) > 50% ) {
+// 	color : #fff;
+// }
+
+.Radial(@color, @from, @to, @stop: 100%){
+	background: @color; /* Old browsers */
+	//background:    -moz-radial-gradient(bottom, ellipse cover, @from 0%, @to @stop); /* FF3.6+ */
+	background:        -webkit-gradient(radial, center bottom, 0px, center bottom, 100%, color-stop(0%,@from), color-stop(100%,@to)); /* Chrome,Safari4+ */
+	background: -webkit-radial-gradient(bottom, ellipse cover, @from 0%,@to @stop); /* Chrome10+,Safari5.1+ */
+	background:      -o-radial-gradient(bottom, ellipse cover, @from 0%,@to @stop); /* Opera 12+ */
+	//background:     -ms-radial-gradient(bottom, ellipse cover, @from 0%,@to @stop); /* IE10+ */
+	background:         radial-gradient(ellipse at center,     @from 0%,@to @stop); /* W3C */
+	//filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='@from', endColorstr='@to',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
+
+// Button Hover State
+// add the same transparent gradient to all buttons
+.ButtonHover(@from: hsla(0,0,80%,0.2), @to: hsla(0,0,80%,0.1)){
+	background-image: -webkit-gradient(linear, left top, left bottom, from(@from), to(@to)); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, @from, @to); /* Chrome 10+, Saf5.1+, iOS 5+ */
+	//background-image:    -moz-linear-gradient(top, @from, @to); /* FF3.6 */
+	//background-image:     -ms-linear-gradient(top, @from, @to); /* IE10 */
+	background-image:      -o-linear-gradient(top, @from, @to); /* Opera 11.10+ */
+	background-image:         linear-gradient(top, @from, @to);
+}
+
+.ButtonOverlay(@from: hsla(0,0,20%,0.2), @to: hsla(0,0,20%,0.1)){
+	background-image: -webkit-gradient(linear, left top, left bottom, from(@from), to(@to)); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, @from, @to); /* Chrome 10+, Saf5.1+, iOS 5+ */
+	//background-image:    -moz-linear-gradient(top, @from, @to); /* FF3.6 */
+	//background-image:     -ms-linear-gradient(top, @from, @to); /* IE10 */
+	background-image:      -o-linear-gradient(top, @from, @to); /* Opera 11.10+ */
+	background-image:         linear-gradient(top, @from, @to);
+}
+
+// Gradients for modern bowsers
+// IE -10 use conditional comments to add classes to the body tag to target them with filters
+.Gradient(@color: #ddd){
+	background-color: @color;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(lighten(@color, 10%)), to(darken(@color, 10%))); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, lighten(@color, 5%), darken(@color, 5%)); /* Chrome 10+, Saf5.1+, iOS 5+ */
+	//background-image:    -moz-linear-gradient(top, lighten(@color, 5%), darken(@color, 5%)); /* FF3.6 */
+	//background-image:     -ms-linear-gradient(top, lighten(@color, 5%), darken(@color, 5%)); /* IE10 */
+	background-image:      -o-linear-gradient(top, lighten(@color, 5%), darken(@color, 5%)); /* Opera 11.10+ */
+	background-image:         linear-gradient(top, lighten(@color, 5%), darken(@color, 5%));
+
+	// removed Internet Explorer gradient filter bur to LRC bug - low traffic from Internet Explorer 6 & 7 anyway
+	//filter:~"progid:DXImageTransform.Microsoft.gradient(startColorstr='"lighten(@color, 5%)~"', endColorstr='"darken(@color, 5%)~"')"; /* IE 6,7 */
+	//-ms-filter: ~"progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='"lighten(@color, 5%)~"', endColorstr='"darken(@color, 5%)~"')"; /* IE 8,9 */
+}
+
+// dark top to light bottom
+.GradientAlt(@color: #ddd){
+	background-color: @color;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(lighten(@color, 5%)), to(lighten(@color, 20%))); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, lighten(@color, 10%), lighten(@color, 30%)); /* Chrome 10+, Saf5.1+, iOS 5+ */
+	//background-image:    -moz-linear-gradient(top, lighten(@color, 10%), lighten(@color, 30%)); /* FF3.6 */
+	//background-image:     -ms-linear-gradient(top, lighten(@color, 10%), lighten(@color, 30%)); /* IE10 */
+	background-image:      -o-linear-gradient(top, lighten(@color, 10%), lighten(@color, 30%)); /* Opera 11.10+ */
+	background-image:         linear-gradient(top, lighten(@color, 10%), lighten(@color, 30%));
+
+	// removed Internet Explorer gradient filter bur to LRC bug - low traffic from Internet Explorer 6 & 7 anyway
+	//filter:~"progid:DXImageTransform.Microsoft.gradient(startColorstr='"lighten(@color, 5%)~"', endColorstr='"darken(@color, 5%)~"')"; /* IE 6,7 */
+	//-ms-filter: ~"progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='"lighten(@color, 5%)~"', endColorstr='"darken(@color, 5%)~"')"; /* IE 8,9 */
+}
+
+.Gradients(@from, @to) {
+	background-color: @from;
+	background-image: -webkit-gradient(linear, left top, left bottom, @from, @to);
+	background-image: -webkit-linear-gradient(top, @from, @to);
+	//background-image:    -moz-linear-gradient(top, @from, @to);
+	//background-image:     -ms-linear-gradient(top, @from, @to);
+	background-image:      -o-linear-gradient(top, @from, @to);
+	background-image:         linear-gradient(top, @from, @to);
+
+}
+
+.Gradient(@color: #ddd, @from, @to) {
+	background-color: @color;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(lighten(@color, @from)), to(darken(@color, @to))); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, lighten(@color, @from), darken(@color, @to)); /* Chrome 10+, Saf5.1+, iOS 5+ */
+	//background-image:    -moz-linear-gradient(top, lighten(@color, @from), darken(@color, @to)); /* FF3.6 */
+	//background-image:     -ms-linear-gradient(top, lighten(@color, @from), darken(@color, @to)); /* IE10 */
+	background-image:      -o-linear-gradient(top, lighten(@color, @from), darken(@color, @to)); /* Opera 11.10+ */
+	background-image:         linear-gradient(top, lighten(@color, @from), darken(@color, @to));
+}
+
+/*.Gradient(@color: #ddd, @from, @to) when not (ispercentage(@from)){
+	background-color: @color;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(lighten(@color, @from)), to(darken(@color, @to)));
+	background-image: -webkit-linear-gradient(top, @from, @to);
+	background-image:    -moz-linear-gradient(top, @from, @to);
+	background-image:     -ms-linear-gradient(top, @from, @to);
+	background-image:      -o-linear-gradient(top, @from, @to);
+	background-image:         linear-gradient(top, @from, @to);
+
+}*/
+
+// OPACITY
+// @todo: fix the alpha filter - not compiling
+.Opacity(@opacity: 0.5){
+      -ms-filter	: ~"progid:DXImageTransform.Microsoft.Alpha(Opacity="@opacity*100~")"; 	// IE 8
+      //filter		: ~"alpha(opacity="@opacity*100~")"; 									// IE 5-7
+      //-moz-opacity	: @opacity;											 					// Netscape
+      //-khtml-opacity: @opacity;												 				// Safari 1.x
+      opacity		: @opacity;	// Chrome 4+, FF2+, Saf3.1+, Opera 9+, IE9, iOS 3.2+, Android 2.1+
+}
+
+// Box Shadow
+
+.BoxShadow(@inset, @horiz, @verti, @blur, @spread, @color){
+    -webkit-box-shadow: @arguments; // Saf3-4, iOS 4.0.2 - 4.2, Android 2.3+
+       //-moz-box-shadow: @arguments; // FF3.5 - 3.6
+            box-shadow: @arguments; // Opera 10.5, IE9, Saf5.1+, FF4+, Chrome 6+, iOS 5
+}
+.BoxShadow(@inset, @horiz, @verti, @blur, @color){
+    -webkit-box-shadow: @arguments; // Saf3-4, iOS 4.0.2 - 4.2, Android 2.3+
+       //-moz-box-shadow: @arguments; // FF3.5 - 3.6
+            box-shadow: @arguments; // Opera 10.5, IE9, Saf5.1+, FF4+, Chrome 6+, iOS 5
+}
+
+.BoxShadow(@horiz, @verti, @blur, @color){
+    -webkit-box-shadow: @arguments; // Saf3-4, iOS 4.0.2 - 4.2, Android 2.3+
+       //-moz-box-shadow: @arguments; // FF3.5 - 3.6
+            box-shadow: @arguments; // Opera 10.5, IE9, Saf5.1+, FF4+, Chrome 6+, iOS 5
+}
+
+.BoxShadow(@inner_offset, @inner_blur, @inner_color, @outer_offset, @outer_blur, @outer_spread, @outer_color){
+    -webkit-box-shadow: @inner_offset @inner_offset @inner_blur @inner_color inset, @outer_offset @outer_offset @outer_blur @outer_spread @outer_color; // Saf3-4, iOS 4.0.2 - 4.2, Android 2.3+
+       //-moz-box-shadow: @inner_offset @inner_offset @inner_blur @inner_color inset, @outer_offset @outer_offset @outer_blur @outer_spread @outer_color; // FF3.5 - 3.6
+            box-shadow: @inner_offset @inner_offset @inner_blur @inner_color inset, @outer_offset @outer_offset @outer_blur @outer_spread @outer_color; // Opera 10.5, IE9, Saf5.1+, FF4+, Chrome 6+, iOS 5
+}
+
+// Border Radius
+.BorderRadius(@radius: 5px){
+    //-webkit-border-radius: @radius; /* Saf3-4, iOS 1-3.2, Android ≤1.6 */
+       //-moz-border-radius: @radius; /* FF1-3.6 */
+            border-radius: @radius; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */
+
+	/* useful if you don't want a bg color from leaking outside the border: */
+	//-moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
+}
+.BorderRadius(@rtl, @rtr, @rbr, @rbl){
+    //-webkit-border-radius: @arguments; /* Saf3-4, iOS 1-3.2, Android ≤1.6 */
+       //-moz-border-radius: @arguments; /* FF1-3.6 */
+            border-radius: @arguments; /* Opera 10.5, IE9, Saf5, Chrome, FF4, iOS 4, Android 2.1+ */
+
+	/* useful if you don't want a bg color from leaking outside the border: */
+	//-moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box;
+}
+
+.CentreElement(@width, @topmargin: 0){
+	width :@width;
+	margin:@topmargin auto;
+}
+.CentreElement(@width, @minwidth, @topmargin: 0){
+	width 	 : @width;
+	min-width: @minwidth;
+	margin	 : @topmargin auto;
+}
+
+.FloatLeft(){
+	display: inline-block;
+	float  : left;
+}
+.FloatRight(){
+	display: inline-block;
+	float  : right;
+}
+
+// Scale animation
+.Scale(@scaleTo: 1){
+    -webkit-transform: scale(@scaleTo);  /* Saf3.1+, Chrome */
+       -moz-transform: scale(@scaleTo);  /* FF3.5+ */
+        -ms-transform: scale(@scaleTo);  /* IE9 */
+         -o-transform: scale(@scaleTo);  /* Opera 10.5+ */
+            transform: scale(@scaleTo);
+               filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.9999025240093042, M12=-0.013962180339145272, M21=0.013962180339145272, M22=0.9999025240093042,SizingMethod='auto expand'); /* IE6–IE9 */
+}
+
+.Rotate(@rotation: 1){
+	-moz-transform:rotate(@rotation*1deg);
+	-webkit-transform:rotate(@rotation*1deg);
+	-o-transform:rotate(@rotation*1deg);
+	-ms-transform:rotate(@rotation*1deg);
+	filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=1.5);
+}
+
+.Perspective(@perspective){
+	-webkit-perspective: @perspective;
+	-moz-perspective   : @perspective;
+	-ms-perspective    : @perspective;
+	perspective        : @perspective;
+}
+
+// Transitions for CSS animations
+.Transition(@feature: all, @time: 0.25s, @style: ease-in) {
+  -webkit-transition: @arguments; /* Saf5, Chrome */
+     -moz-transition: @arguments; /* FF5+ */
+      -ms-transition: @arguments; /* IE10 */
+       -o-transition: @arguments; /* Opera 12+ */
+       	  transition: @arguments;
+}
+.Animate(@feature: all, @time: 0.25s, @style: ease-in) { // more semantic but identical to Transition above
+  -webkit-transition: @arguments; /* Saf5, Chrome */
+     -moz-transition: @arguments; /* FF5+ */
+      -ms-transition: @arguments; /* IE10 */
+       -o-transition: @arguments; /* Opera 12+ */
+          transition: @arguments;
+}
+
+.TransformStyle(@style){
+	-webkit-transform-style : @style;
+	-moz-transform-style    : @style;
+	-o-transform-style      : @style;
+	-ms-transform-style     : @style;
+	transform-style         : @style;
+}
+
+// Transition duration
+.TransDuration(@time){
+	-webkit-transition-duration		: @time;
+    -moz-transition-duration		: @time;
+    -o-transition-duration			: @time;
+    -ms-transition-duration			: @time;
+    transition-duration				: @time;
+}
+
+.Transparent(@percent: 0.55){
+	background: rgba(255,255,255,@percent);
+}
+.FontSize(@size: 12){
+	font-size:@size*1px;
+	font-size:@size/10rem;
+}
+
+.TextSize(@_, @size: 12) {
+  font-size:@size*1px;
+}
+
+.TextSize(noscale, @size) {
+  font-size:floor( (@size*0.645) )/10rem;
+}
+
+.TextSize(prescale , @size) {
+  font-size:@size/10rem;
+}
+/*.FontSize(@size: 12){
+	font-size:@size*1px;
+	font-size:floor( (@size*0.635) )/10rem;
+}*/
+
+/*
+.FontSize(scaled, @size: 12) {
+  font-size:floor( (@size*0.635) )/10rem;
+}*/
+
+
+
+.TextShadow(@horiz, @verti, @blur, @color, @background: transparent) {
+     text-shadow: @horiz @verti @blur @color; /* FF3.5+, Opera 9+, Saf1+, Chrome, IE10 */
+     zoom: 1; /* Has Layout for IE lt 9 */
+	 background-color: @background;
+	 /* http://www.useragentman.com/blog/2011/04/14/css3-text-shadow-can-it-be-done-in-ie-without-javascript/ */
+/*	 -ms-filter: ~"progid:DXImageTransform.Microsoft.Chroma(Color="@background~") progid:DXImageTransform.Microsoft.DropShadow(Color="@color~", OffX="@horiz~", OffY="@verti)~";"
+	 filter: ~"progid:DXImageTransform.Microsoft.Chroma(Color="@background~")"
+	         ~"progid:DXImageTransform.Microsoft.DropShadow(OffX="@horiz~", OffY="@verti~", Color="@color~")";*/
+}
+
+
+/* SEQUENCE ANIMATION MIXINS */
+
+.FoldUp(){
+	.Opacity(0);
+	-webkit-transform:
+		persepctive(300px)
+		translate(0%, 0%)
+		translate3d(0px, 200px, 0px)
+		rotateX(90deg) rotateY(0deg) rotateZ(0deg)
+		scaleX(0.4) scaleY(0.4) scaleZ(0.2);
+}
+
+.FoldDown(){
+	.Opacity(0);
+	-webkit-transform:
+		persepctive(300px)
+		translate(0%, 0%)
+		translate3d(0%, 200%, -500px)
+		rotateX(-90deg) rotateY(0deg) rotateZ(0deg)
+		scaleX(1) scaleY(1) scaleZ(1);
+}
+
+.SlideOut3D(){
+	.Opacity(0);
+	-webkit-transform-style: preserve-3d;
+	-webkit-transform:
+		translate(100%, 0%)
+		translate3d(0px, 0px, 0px)
+		rotateX(90deg) rotateY(-90deg) rotateZ(0deg)
+		scaleX(1) scaleY(1) scaleZ(1);
+}
+.SlideIn3D(){
+	.Opacity(0);
+	-webkit-transform-style: preserve-3d;
+	-webkit-transform:
+		persepctive(100px)
+		translate(0%, 0%)
+		translate3d(0px, -0px, -1200px)
+		rotateX(0deg) rotateY(0deg) rotateZ(0deg)
+		scaleX(1) scaleY(1) scaleZ(1);
+}
+
+.AnimateOut(){
+	.Opacity(0);
+	-webkit-transform-style: preserve-3d;
+	-webkit-transform:
+		translate(0%, 200%)
+		translate3d(0px, 0px, 0px)
+		rotateX(90deg) rotateY(0deg) rotateZ(180deg)
+		scaleX(1) scaleY(1) scaleZ(1);
+}
+
+.InitialPosition(){
+	.Opacity(0);
+	-webkit-transform-style: preserve-3d;
+	-moz-transform-style: preserve-3d;
+
+	-webkit-transform:
+		perspective(100px)
+		translate(0%, 0px)							/* Move the element the specified distance x, y     */
+		translate3d(0px, 0px, -1800px)				/* Move the element the specified distance x, y, z  */
+		rotateX(0deg) rotateY(0deg) rotateZ(0deg)
+		scaleX(1) scaleY(1) scaleZ(1);
+
+	-moz-transform:
+		perspective(100px)
+		translate(0%, 0px)							/* Move the element the specified distance x, y     */
+		translate3d(0px, 0px, -1800px)				/* Move the element the specified distance x, y, z  */
+		rotateX(0deg) rotateY(0deg) rotateZ(0deg)
+		scaleX(1) scaleY(1) scaleZ(1);
+}
